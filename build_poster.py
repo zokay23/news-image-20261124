@@ -1,7 +1,22 @@
 #!/usr/bin/env python3
-"""Build the news-image-20261124 entry poster: a premium newspaper front
-page for TUESDAY 24 NOVEMBER 2026. Deterministic: no randomness, no clock,
-no network. Writes entry.png (1024x1024) next to this script."""
+"""Build the news-image-20261124 entry poster, version 2: a premium newspaper
+front page for TUESDAY 24 NOVEMBER 2026.
+
+v2 changes over v1 (same edition, new build session):
+- Drops v1's Hormuz "25 killed" headline: the UN's 25-seafarer toll covers
+  February-November, it was not a 24 November event.
+- Adds stories first reported on 24 November itself: the Zaporizhzhia
+  strike, NATO's space-defence vow, China's death sentence for a spy,
+  the US drone role in the El Chapo Isidro capture, and Russian jets in
+  South Korea's air-defence zone.
+- Corrects the numbers: Banten factory-fire toll 26 (not 24), Nvidia +31%
+  (not "nearly $1tn"), Nepal package $1.7bn (Rs 15,000 crore).
+- New hero art: a globe stamped NO DEAL, replacing v1's abstract sunset.
+- Six stories in a 3+3 grid, a five-item ALSO TODAY strip, and a sport line.
+
+Deterministic: no randomness, no clock, no network. Writes entry.png
+(1024x1024, under 1 MiB) next to this script.
+"""
 
 import os
 from PIL import Image, ImageDraw, ImageFont
@@ -10,6 +25,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 OUT = os.path.join(HERE, "entry.png")
 
 W, H = 1024, 1024
+MARGIN = 36
 PAPER = (247, 243, 234)
 INK = (20, 18, 16)
 RED = (178, 39, 30)
@@ -70,9 +86,9 @@ def wrap(draw, text, fnt, width):
     return lines
 
 
-def draw_wrapped(draw, text, fnt, x, y, width, fill=INK, leading=None, spacing=None):
+def draw_wrapped(draw, text, fnt, x, y, width, fill=INK, leading=None):
     if leading is None:
-        leading = int(fnt.size * 1.22)
+        leading = int(fnt.size * 1.24)
     lines = wrap(draw, text, fnt, width)
     for line in lines:
         draw.text((x, y), line, font=fnt, fill=fill)
@@ -80,176 +96,219 @@ def draw_wrapped(draw, text, fnt, x, y, width, fill=INK, leading=None, spacing=N
     return y
 
 
-def rule(draw, x0, y, x1, w=2, fill=RULE):
-    draw.line([(x0, y), (x1, y)], fill=fill, width=w)
+def rule(draw, x0, x1, y, width=1, fill=RULE):
+    draw.line([(x0, y), (x1, y)], fill=fill, width=width)
 
 
-def kicker(draw, text, x, y, size=17, fill=RED):
+def kicker(draw, text, x, y, size=16, fill=RED):
     f = font("sans_bold", size)
     draw.text((x, y), text, font=f, fill=fill)
-    return f.size + 6
+    return y + size + 6
 
 
-def headline(draw, text, fnt, x, y, width, leading=None):
-    return draw_wrapped(draw, text, fnt, x, y, width, leading=leading)
-
-
-def body(draw, text, x, y, width, size=19):
-    f = font("serif", size)
-    return draw_wrapped(draw, text, f, x, y, width, leading=int(size * 1.32))
-
-
-def deck(draw, text, x, y, width, size=20):
-    f = font("serif_italic", size)
-    return draw_wrapped(draw, text, f, x, y, width, leading=int(size * 1.3))
-
-
-def hero_art(draw, x, y, w, h):
-    """Dusk sky, low sun, cracked earth — the climate summit that failed."""
-    # sky gradient: deep navy -> burnt orange
-    top = (24, 42, 74)
-    mid = (150, 74, 52)
-    bot = (214, 138, 62)
-    for i in range(h):
-        t = i / max(h - 1, 1)
-        if t < 0.55:
-            s = t / 0.55
-            c = tuple(int(top[j] + (mid[j] - top[j]) * s) for j in range(3))
-        else:
-            s = (t - 0.55) / 0.45
-            c = tuple(int(mid[j] + (bot[j] - mid[j]) * s) for j in range(3))
-        draw.line([(x, y + i), (x + w, y + i)], fill=c)
-    # sun
-    cx, cy, r = x + w // 2, y + int(h * 0.42), 46
-    draw.ellipse([cx - r, cy - r, cx + r, cy + r], fill=(246, 214, 150))
-    draw.ellipse([cx - r - 7, cy - r - 7, cx + r + 7, cy + r + 7], outline=(246, 214, 150, 160), width=2)
-    # horizon + cracked ground
-    gy = y + int(h * 0.72)
-    draw.rectangle([x, gy, x + w, y + h], fill=(26, 20, 16))
-    draw.line([(x, gy), (x + w, gy)], fill=(214, 138, 62), width=2)
-    cracks = [
-        (0.12, 0.0, 0.22, 0.10), (0.22, 0.10, 0.18, 0.20), (0.22, 0.10, 0.34, 0.16),
-        (0.55, 0.0, 0.50, 0.12), (0.50, 0.12, 0.62, 0.18), (0.50, 0.12, 0.44, 0.24),
-        (0.80, 0.0, 0.74, 0.10), (0.74, 0.10, 0.84, 0.20),
-    ]
-    for (ax, ay, bx, by) in cracks:
-        draw.line([(x + ax * w, gy + ay * (h - gy)), (x + bx * w, gy + by * (h - gy))],
-                  fill=(120, 96, 70), width=2)
-    # tiny delegate silhouettes on the horizon
-    for fx in (0.30, 0.36, 0.64, 0.70):
-        px = x + fx * w
-        draw.rectangle([px - 2, gy - 14, px + 2, gy], fill=(10, 8, 6))
-        draw.ellipse([px - 3, gy - 20, px + 3, gy - 14], fill=(10, 8, 6))
+def hero_art(img, draw, x, y, w, h):
+    """Globe stamped NO DEAL: navy sky, cream globe, red stamp, black base."""
+    draw.rectangle([x, y, x + w, y + h], fill=(22, 38, 63))
+    stars = [(18, 22), (52, 44), (96, 16), (140, 38), (196, 20), (238, 46),
+             (282, 18), (318, 40), (30, 70), (330, 66), (160, 12), (260, 62)]
+    for sx, sy in stars:
+        draw.ellipse([x + sx - 1, y + sy - 1, x + sx + 1, y + sy + 1],
+                     fill=(214, 222, 235))
+    cx, cy, r = x + w // 2 - 30, y + h // 2 - 6, 74
+    draw.ellipse([cx - r, cy - r, cx + r, cy + r], fill=(242, 227, 184),
+                 outline=(176, 141, 60), width=3)
+    for k in (1, 0):
+        inset = 26 * k
+        draw.arc([cx - r + inset, cy - r, cx + r - inset, cy + r],
+                 270, 90, fill=(31, 58, 95), width=2)
+        draw.arc([cx - r + inset, cy - r, cx + r - inset, cy + r],
+                 90, 270, fill=(31, 58, 95), width=2)
+    for dy in (-34, 0, 34):
+        draw.line([cx - r + 12, cy + dy, cx + r - 12, cy + dy],
+                  fill=(31, 58, 95), width=2)
+    stamp = Image.new("RGBA", (260, 92), (0, 0, 0, 0))
+    sd = ImageDraw.Draw(stamp)
+    sf = font("sans_bold", 46)
+    sd.rectangle([3, 3, 256, 88], outline=(178, 39, 30), width=5)
+    sd.text((130, 46), "NO DEAL", font=sf, fill=(178, 39, 30), anchor="mm")
+    stamp = stamp.rotate(14, expand=True, resample=Image.BICUBIC)
+    img.paste(stamp, (cx - stamp.width // 2, cy - stamp.height // 2), stamp)
+    draw.rectangle([x, y + h - 26, x + w, y + h], fill=(12, 12, 12))
+    draw.line([x, y + h - 26, x + w, y + h - 26], fill=(176, 141, 60), width=2)
+    for bx, bw, bh in [(18, 14, 12), (44, 10, 18), (66, 18, 9), (96, 12, 15),
+                       (250, 12, 14), (276, 16, 9), (306, 10, 17)]:
+        draw.rectangle([x + bx, y + h - 26 - bh, x + bx + bw, y + h - 26],
+                       fill=(12, 12, 12))
 
 
 def main():
     img = Image.new("RGB", (W, H), PAPER)
-    d = ImageDraw.Draw(img)
-    M = 36  # margin
-    R = W - M  # right edge
+    draw = ImageDraw.Draw(img)
+    right = W - MARGIN
 
-    # ---- top bar ----
-    d.text((M, 10), "EST. 2026  •  ONE DAY, ONE WORLD", font=font("sans_bold", 13), fill=GREY)
-    d.text((R - d.textlength("No. 328  •  FREE", font=font("sans_bold", 13)), 10),
-           "No. 328  •  FREE", font=font("sans_bold", 13), fill=GREY)
-    rule(d, M, 30, R, 1, LIGHT_LINE)
+    # --- top kicker ---
+    f_kick = font("sans_bold", 15)
+    draw.text((MARGIN, 14), "EST. 2026  •  ONE DAY, ONE WORLD",
+              font=f_kick, fill=GREY)
+    tag = "No. 329  •  FREE"
+    draw.text((right - draw.textlength(tag, font=f_kick), 14), tag,
+              font=f_kick, fill=GREY)
+    rule(draw, MARGIN, right, 36, 1, GREY)
 
-    # ---- masthead ----
-    mast = font("display", 88)
-    name = "THE WORLD TODAY"
-    d.text(((W - d.textlength(name, font=mast)) / 2, 34), name, font=mast, fill=INK)
-    rule(d, M, 132, R, 3)
+    # --- masthead ---
+    f_mast = font("display", 88)
+    mast = "THE WORLD TODAY"
+    mw = draw.textlength(mast, font=f_mast)
+    draw.text(((W - mw) / 2, 42), mast, font=f_mast, fill=INK)
+    rule(draw, MARGIN, right, 140, 3, INK)
 
-    # ---- date line: the day itself is the point ----
-    date_f = font("serif_bold", 40)
+    # --- date line ---
+    f_date = font("serif_bold", 38)
     date = "TUESDAY, 24 NOVEMBER 2026"
-    dw = d.textlength(date, font=date_f)
-    dy = 144
-    rule(d, M, dy + 24, (W - dw) / 2 - 16, 1, GOLD)
-    rule(d, (W + dw) / 2 + 16, dy + 24, R, 1, GOLD)
-    d.text(((W - dw) / 2, dy), date, font=date_f, fill=RED)
-    tag_f = font("sans_bold", 14)
-    tag = "ONE DAY  •  ONE WORLD  •  ALL THE NEWS THAT MATTERS"
-    d.text(((W - d.textlength(tag, font=tag_f)) / 2, 196), tag, font=tag_f, fill=NAVY)
-    rule(d, M, 218, R, 2)
+    dw = draw.textlength(date, font=f_date)
+    gy = 160
+    rule(draw, MARGIN, (W - dw) / 2 - 24, gy, 1, GOLD)
+    rule(draw, (W + dw) / 2 + 24, right, gy, 1, GOLD)
+    draw.text(((W - dw) / 2, 144), date, font=f_date, fill=RED)
+    f_tag = font("sans_bold", 14)
+    tagline = "ONE DAY  •  ONE WORLD  •  ALL THE NEWS THAT MATTERS"
+    tw = draw.textlength(tagline, font=f_tag)
+    draw.text(((W - tw) / 2, 190), tagline, font=f_tag, fill=NAVY)
+    rule(draw, MARGIN, right, 210, 2, INK)
 
-    # ---- HERO: COP31 ----
-    y = 232
-    hx, hw = M, 600
-    ax, aw = M + 620, 368
-    y += kicker(d, "CLIMATE  •  ANTALYA, TÜRKIYE", hx, y, 18)
-    y = headline(d, "COP31 COLLAPSES", font("display", 54), hx, y + 2, hw, leading=56)
-    y = headline(d, "WITHOUT A DEAL", font("display", 54), hx, y, hw, leading=56)
-    y = deck(d, "Two weeks of talks end in deadlock over fossil fuels — the first climate summit to fail since 2009.",
-             hx, y + 8, hw, 20)
-    y = body(d, "The Antalya pact died on Sunday: 190 nations could not agree to name coal, oil and gas. The EU refused a text that never mentioned fossil fuels. The longest COP on record ends with no plan.",
-             hx, y + 6, hw, 17)
-    hero_art(d, ax, 232, aw, 200)
-    d.text((ax, 232 + 200 + 8), "Antalya — the longest COP on record.",
-           font=font("serif_italic", 14), fill=GREY)
-    rule(d, M, 512, R, 2)
+    # --- hero ---
+    hx, hy = MARGIN, 224
+    hw = 566
+    y = kicker(draw, "CLIMATE  •  ANTALYA, TÜRKIYE", hx, hy, 17)
+    f_hero = font("display", 52)
+    y = draw_wrapped(draw, "COP31 COLLAPSES WITHOUT A DEAL", f_hero,
+                     hx, y, hw, INK, leading=58)
+    y += 4
+    f_deck = font("serif_italic", 19)
+    y = draw_wrapped(
+        draw,
+        "Two weeks of talks end in deadlock over fossil fuels — the "
+        "longest summit on record, the first to fail since 2009.",
+        f_deck, hx, y, hw, INK, leading=24)
+    y += 6
+    f_body = font("serif", 16)
+    y = draw_wrapped(
+        draw,
+        "The Antalya pact died on Sunday: the EU, the UK and 90 nations "
+        "refused a text that never named fossil fuels. Smaller wins "
+        "survived — a just-transition fund and a pledge for clean power "
+        "to reach 35% by 2035.",
+        f_body, hx, y, hw, INK, leading=20)
+    print("hero text bottom:", y)
 
-    # ---- ROW 2: three columns ----
-    y = 526
-    colw = (R - M - 2 * 24) // 3
-    cols = [
-        ("THE GULF  •  HORMUZ", "25 KILLED IN THE STRAIT OF HORMUZ",
-         "The UN counts 25 seafarers dead around the strait. Iran vows to use “every means” against a US blockade, and two tankers are hit."),
-        ("UKRAINE  •  KYIV", "DRONES STRIKE KYIV; SHIP ABLAZE OFF FINLAND",
-         "Russian drones leave several missing in the Kyiv region. The cargo ship Sparta II burns in the Gulf of Finland."),
-        ("INDONESIA  •  BANTEN", "FACTORY FIRE KILLS AT LEAST 24",
-         "A blaze tears through a candy factory west of Jakarta. Rescuers search the rubble for workers still missing."),
+    ax, ay = 640, 224
+    aw, ah = right - ax, 208
+    hero_art(img, draw, ax, ay, aw, ah)
+    f_cap = font("serif_italic", 15)
+    draw.text((ax, ay + ah + 8), "Antalya — the longest COP on record.",
+              font=f_cap, fill=GREY)
+
+    rule(draw, MARGIN, right, 508, 2, INK)
+
+    # --- grid: two rows of three ---
+    stories = [
+        ("UKRAINE  •  ZAPORIZHZHIA",
+         "ZAPORIZHZHIA STRIKE KILLS TWO",
+         "Russian forces hit the city overnight and at dawn on Tuesday, "
+         "killing two people and injuring dozens."),
+        ("INDONESIA  •  BANTEN",
+         "FACTORY FIRE TOLL RISES TO 26",
+         "The toll from Saturday's candy-factory blaze climbs as rescuers "
+         "keep digging; eight workers are still missing."),
+        ("TECH  •  SILICON VALLEY",
+         "HUANG IS BACK — NVIDIA JUMPS 31%",
+         "Nvidia's board reinstates Jensen Huang after pressure from "
+         "Trump. Shares soar and the S&P 500 climbs 4.7%."),
+        ("ASIA  •  INDIA–NEPAL",
+         "NEW TRAIN, $1.7BN PLEDGE FOR NEPAL",
+         "Modi and Nepal's PM Balen Shah flag off the Saryu-Kamala "
+         "Express and unveil India's biggest aid package yet."),
+        ("USA  •  NEW YORK",
+         "COURT OPENS PATH TO ERASE TRUMP CONVICTION",
+         "An appeals court revives Trump's bid to move his hush-money "
+         "case to federal court, where he can claim immunity."),
+        ("EUROPE  •  COPENHAGEN",
+         "TOP COURT UPHOLDS DENMARK'S 'GHETTO LAW' EVICTIONS",
+         "The Supreme Court rules that ending 91 leases in Helsingør was "
+         "not ethnic discrimination."),
     ]
-    for i, (kick, head, text) in enumerate(cols):
-        x = M + i * (colw + 24)
-        yy = y
-        yy += kicker(d, kick, x, yy, 15)
-        yy = headline(d, head, font("serif_bold", 25), x, yy + 2, colw, leading=29)
-        yy = body(d, text, x, yy + 4, colw, 16)
-        if i < 2:
-            d.line([(x + colw + 12, y), (x + colw + 12, y + 168)], fill=LIGHT_LINE, width=1)
-    rule(d, M, 706, R, 2)
+    col_w = (right - MARGIN - 2 * 24) // 3
+    f_head = font("serif_bold", 22)
+    f_story = font("serif", 15)
+    row_tops = [522, 672]
+    row_bottoms = []
+    for i, (kick, head, body) in enumerate(stories):
+        r, c = divmod(i, 3)
+        x = MARGIN + c * (col_w + 24)
+        y = row_tops[r]
+        y = kicker(draw, kick, x, y, 14)
+        y = draw_wrapped(draw, head, f_head, x, y, col_w, INK, leading=26)
+        y = draw_wrapped(draw, body, f_story, x, y + 2, col_w, INK,
+                         leading=19)
+        row_bottoms.append(y)
+        if c:
+            draw.line([x - 12, row_tops[r] + 2, x - 12, y - 4],
+                      fill=LIGHT_LINE, width=1)
+    print("grid row bottoms:", row_bottoms)
+    rule(draw, MARGIN, right, 660, 1, LIGHT_LINE)
+    rule(draw, MARGIN, right, 836, 2, INK)
 
-    # ---- ROW 3: two columns ----
-    y = 720
-    half = (R - M - 24) // 2
-    y1 = y + kicker(d, "TECH  •  SILICON VALLEY", M, y, 15)
-    y1 = headline(d, "HUANG IS BACK — NVIDIA SOARS NEARLY $1TN", font("serif_bold", 25), M, y1 + 2, half, leading=29)
-    y1 = body(d, "Jensen Huang returns to Nvidia and tech stocks rally — almost a trillion dollars added in a day.",
-              M, y1 + 4, half, 16)
-    x2 = M + half + 24
-    y2 = y + kicker(d, "ASIA  •  INDIA–NEPAL", x2, y, 15)
-    y2 = headline(d, "NEW TRAIN, $1.6BN PLEDGE FOR NEPAL", font("serif_bold", 25), x2, y2 + 2, half, leading=29)
-    y2 = body(d, "Modi and Nepal’s PM flag off the Saryu-Kamala Express. India pledges $1.6bn to rebuild after the floods.",
-              x2, y2 + 4, half, 16)
-    d.line([(M + half + 12, y), (M + half + 12, y + 112)], fill=LIGHT_LINE, width=1)
-    rule(d, M, 846, R, 2)
+    # --- ALSO TODAY ---
+    y = 848
+    f_also = font("sans_bold", 15)
+    draw.text((MARGIN, y), "ALSO TODAY", font=f_also, fill=RED)
+    also_left = [
+        "NATO vows to defend space as Russia is reported to be planning "
+        "a nuclear-armed satellite.",
+        "China sentences an official to death for spying.",
+        "A US drone helped capture 'El Chapo Isidro'.",
+    ]
+    also_right = [
+        "Russian jets enter South Korea's air-defence zone.",
+        "Spain's top court amnesties Puigdemont, closing the Catalan "
+        "procés case.",
+    ]
+    f_also_body = font("serif", 15)
+    mid = MARGIN + (right - MARGIN) // 2 + 12
+    yy = y + 26
+    for item in also_left:
+        yy = draw_wrapped(draw, "•  " + item, f_also_body, MARGIN, yy,
+                          mid - MARGIN - 24, INK, leading=19) + 2
+    yy2 = y + 26
+    for item in also_right:
+        yy2 = draw_wrapped(draw, "•  " + item, f_also_body, mid, yy2,
+                           right - mid, INK, leading=19) + 2
+    also_bottom = max(yy, yy2)
+    print("also today bottom:", also_bottom)
+    draw.line([mid - 12, y + 26, mid - 12, also_bottom - 4],
+              fill=LIGHT_LINE, width=1)
+    rule(draw, MARGIN, right, 962, 1, LIGHT_LINE)
 
-    # ---- ROW 4: two short items ----
-    y = 860
-    y1 = y + kicker(d, "USA  •  NEW YORK", M, y, 14)
-    y1 = headline(d, "COURT OPENS PATH TO ERASE TRUMP HUSH-MONEY CONVICTION",
-                  font("serif_bold", 20), M, y1 + 2, half, leading=23)
-    y2 = y + kicker(d, "EUROPE  •  COPENHAGEN", x2, y, 14)
-    y2 = headline(d, "TOP COURT UPHOLDS DENMARK’S ‘GHETTO LAW’ EVICTIONS",
-                  font("serif_bold", 20), x2, y2 + 2, half, leading=23)
-    rule(d, M, 936, R, 2)
+    # --- sport strip ---
+    y = 972
+    draw.text((MARGIN, y), "SPORT", font=f_also, fill=RED)
+    f_sport = font("serif_bold", 16)
+    sport = ("Verstappen wins wild Las Vegas GP  •  Alcaraz takes the ATP "
+             "Finals  •  Antonelli, 20, is F1's youngest champion")
+    draw.text((MARGIN + 78, y + 1), sport, font=f_sport, fill=INK)
 
-    # ---- SPORT strip ----
-    y = 946
-    d.text((M, y), "SPORT", font=font("sans_bold", 15), fill=RED)
-    sport = ("Verstappen wins Las Vegas GP  •  Alcaraz wins ATP Finals  •  "
-             "Gukesh–Sindarov title match opens")
-    d.text((M + 74, y + 1), sport, font=font("serif_bold", 16), fill=INK)
-    rule(d, M, 972, R, 1, LIGHT_LINE)
+    # --- footer ---
+    f_foot = font("sans_bold", 13)
+    foot = ("THE WORLD TODAY  •  TUESDAY 24 NOVEMBER 2026  •  ALL STORIES "
+            "REPORTED 24 NOVEMBER 2026")
+    fw = draw.textlength(foot, font=f_foot)
+    draw.text(((W - fw) / 2, 998), foot, font=f_foot, fill=GREY)
 
-    # ---- footer ----
-    foot = "THE WORLD TODAY  •  TUESDAY 24 NOVEMBER 2026  •  ALL STORIES REPORTED 24 NOVEMBER 2026"
-    ff = font("sans_bold", 13)
-    d.text(((W - d.textlength(foot, font=ff)) / 2, 984), foot, font=ff, fill=GREY)
-
-    img.save(OUT, "PNG", optimize=True)
-    print("wrote", OUT)
+    img.save(OUT, optimize=True)
+    size = os.path.getsize(OUT)
+    print("wrote", OUT, size, "bytes")
+    assert size <= 1048576, "entry.png over 1 MiB"
+    assert img.size == (1024, 1024)
 
 
 if __name__ == "__main__":

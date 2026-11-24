@@ -8,16 +8,16 @@ One image that sums up the world's news of **Tuesday 24 November 2026** — an e
 
 ## The day in one page
 
-**THE WORLD TODAY** — a premium newspaper front page for 24 November 2026:
+**THE WORLD TODAY** — a premium newspaper front page for 24 November 2026 (v2, built on the evening of the 24th from the full day's reporting):
 
 - **COP31 collapses without a deal** — two weeks of climate talks in Antalya end in deadlock over fossil fuels, the first summit to fail since 2009.
-- **25 killed in the Strait of Hormuz** — the UN counts 25 seafarers dead; Iran vows to counter a US blockade as two tankers are hit.
-- **Drones strike Kyiv; a Russian ship burns off Finland** — the cargo ship Sparta II ablaze in the Gulf of Finland.
-- **Factory fire kills at least 24** in Banten, Indonesia.
-- **Huang is back — Nvidia soars nearly $1tn** as tech stocks rally.
-- **New train, $1.6bn pledge for Nepal** — the Saryu-Kamala Express is flagged off.
+- **Zaporizhzhia strike kills two** — Russian forces hit the city overnight and at dawn on Tuesday.
+- **Factory fire toll rises to 26** in Banten, Indonesia; eight workers still missing.
+- **Huang is back — Nvidia jumps 31%** as tech stocks rally; the S&P 500 climbs 4.7%.
+- **New train, $1.7bn pledge for Nepal** — the Saryu-Kamala Express is flagged off; India's biggest aid package yet.
 - **Court opens a path to erase Trump's hush-money conviction**; **Denmark's top court upholds the 'ghetto law' evictions**.
-- **Sport:** Verstappen wins the Las Vegas GP, Alcaraz wins the ATP Finals, and the Gukesh–Sindarov title match opens.
+- **Also today:** NATO vows to defend space; China sentences an official to death for spying; a US drone helped capture 'El Chapo Isidro'; Russian jets enter South Korea's air-defence zone; Spain's top court amnesties Puigdemont.
+- **Sport:** Verstappen wins the wild Las Vegas GP, Alcaraz takes the ATP Finals, and Antonelli, 20, is F1's youngest champion.
 
 ## How it works
 
